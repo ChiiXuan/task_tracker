@@ -1,40 +1,32 @@
-# TaskTracker Lite - How to Launch
+# TaskTracker Lite - Next.js + Node API (Vercel-ready)
 
-This app has a Next.js frontend and a Flask backend that stores tasks in `backend/tasks.txt` (JSON).
+The backend now runs on Node using Next.js API routes (no more Flask). Tasks are stored in a local JSON file (`data/tasks.json`) for development convenience.
 
-## Backend (Flask)
-1) Open PowerShell and go to the backend folder:
+## Run locally
+1) Install deps at the project root:
    ```powershell
-   cd funstuff/backend
+   npm install
    ```
-2) Create and activate a venv:
-   ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
-3) Install deps:
-   ```powershell
-   pip install -r requirements.txt
-   ```
-4) Run the API (default http://localhost:5000):
-   ```powershell
-   flask --app app run --debug
-   ```
-   Tasks will be saved to `backend/tasks.txt` automatically.
-
-## Frontend (Next.js)
-1) In another terminal, go to the project root:
-   ```powershell
-   cd funstuff
-   ```
-2) Start the dev server (expects the backend on port 5000):
+2) Start the dev server (frontend + API):
    ```powershell
    npm run dev
    ```
-3) Open http://localhost:3000 to use the app.
+3) Open http://localhost:3000. Tasks are read/written to `data/tasks.json`.
 
-If your API runs elsewhere, set `NEXT_PUBLIC_API_BASE` before `npm run dev`, e.g.:
-```powershell
-$env:NEXT_PUBLIC_API_BASE = "http://localhost:5000"
-npm run dev
-```
+## Deploy to Vercel
+- Push this repo and import it in Vercel. No extra backend is needed.
+- The file-based storage works for local dev; Vercel’s serverless file system is ephemeral, so plug in a database if you need persistent cloud data. Update `lib/tasks-store.ts` to swap storage.
+
+## API (Node via Next.js)
+- `GET /api/health` – health check
+- `GET /api/tasks` – list tasks (newest first)
+- `POST /api/tasks` – create `{ "title": "...", "completed": false? }`
+- `PATCH /api/tasks/:id` – update `{ "title"?: "...", "completed"?: true }`
+- `DELETE /api/tasks/:id` – delete task
+
+## Configuration
+- `NEXT_PUBLIC_API_BASE` (optional): point the UI to a different backend. By default, requests go to the same origin (e.g., `/api/tasks`).
+- Data file: `data/tasks.json` is created automatically on first write.
+
+## Legacy note
+The old Flask backend in `backend/` is no longer used. You can delete that folder if you don’t need it.

@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# app data
+data/tasks.json
+
 # python
 __pycache__/
 *.py[cod]

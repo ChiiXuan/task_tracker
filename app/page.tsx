@@ -9,7 +9,11 @@ type Task = {
   created_at?: string;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:5000";
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE ?? "").replace(/\/$/, "");
+const apiUrl = (path: string) => {
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return API_BASE ? `${API_BASE}${normalized}` : normalized;
+};
 
 export default function Home() {
   const [taskTitle, setTaskTitle] = useState("");
@@ -18,14 +22,14 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await fetch(`${API_BASE}/tasks`);
-        if (!response.ok) throw new Error("Failed to load tasks");
-        const data: Task[] = await response.json();
-        setTasks(data);
-        setError(null);
-      } catch (err) {
+        const fetchTasks = async () => {
+          try {
+            const response = await fetch(apiUrl("/api/tasks"));
+            if (!response.ok) throw new Error("Failed to load tasks");
+            const data: Task[] = await response.json();
+            setTasks(data);
+            setError(null);
+          } catch (err) {
         console.error(err);
         setError("Could not load tasks from the server.");
       } finally {
@@ -46,7 +50,7 @@ export default function Home() {
     const title = taskTitle.trim();
     if (!title) return;
     try {
-      const response = await fetch(`${API_BASE}/tasks`, {
+      const response = await fetch(apiUrl("/api/tasks"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title }),
@@ -64,7 +68,7 @@ export default function Home() {
 
   const toggleTask = async (id: string, completed: boolean) => {
     try {
-      const response = await fetch(`${API_BASE}/tasks/${id}`, {
+      const response = await fetch(apiUrl(`/api/tasks/${id}`), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ completed }),
@@ -81,7 +85,7 @@ export default function Home() {
 
   const deleteTask = async (id: string) => {
     try {
-      const response = await fetch(`${API_BASE}/tasks/${id}`, {
+      const response = await fetch(apiUrl(`/api/tasks/${id}`), {
         method: "DELETE",
       });
       if (!response.ok) throw new Error("Failed to delete task");
